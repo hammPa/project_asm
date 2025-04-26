@@ -20,22 +20,27 @@ newline:
     int 0x80
     ret
 
+
+
 ; int to string
 int_to_string:
+    lea edi, [BUFFER_INT + 11]  ; Point to end of buffer
+    mov byte [edi], 0           ; Null terminator
+    mov ebx, 10                 ; Divisor
+
 .convert_loop:
-    xor edx, edx                    ; clear edx untuk menghilangkan remains
-    mov ecx, 10                     ; basis 10
-    div ecx                         ; eax / ecx, hasil di eax, sisa remains di edx
-
-    add dl, '0'                     ; ubah ke ascii
-    dec edi                         ; mundur 1 posisi di buffer
-    mov [edi], dl                   ; masukkan ascii sebagai nilai di alamat yang di tunjuk edi sekarang
-
-    test eax, eax
+    dec edi                     ; Move back in buffer
+    xor edx, edx                ; Clear remainder
+    div ebx                     ; Divide by 10
+    add dl, '0'                 ; Convert to ASCII
+    mov [edi], dl               ; Store character
+    test eax, eax               ; Check if zero
     jnz .convert_loop
 
-.done:
-    ; edi sekarang berisi string hasil konversi
+    ; Calculate length
+    mov ecx, edi                ; Start of string
+    mov edx, BUFFER_INT + 11    ; End of buffer
+    sub edx, ecx                ; Calculate length
     ret
 
 
@@ -78,5 +83,5 @@ scan:
     mov eax, 3
     int 0x80
 
-    mov [ecx + eax], byte 0         ; setelah syscall int 0x80 untuk read, EAX akan berisi jumlah byte yang berhasil dibaca.
+    mov [ecx + eax - 1], byte 0         ; setelah syscall int 0x80 untuk read, EAX akan berisi jumlah byte yang berhasil dibaca.
     ret
