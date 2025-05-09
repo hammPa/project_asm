@@ -104,6 +104,8 @@ _start:
 
 .pop:
     mov ebx, [head]
+    cmp ebx, 0
+    je .call_newline_after_pop
 
 .find_last:
     cmp [ebx + 4], dword 0      ; while current->next == NULL, exit 
@@ -118,16 +120,12 @@ _start:
     je .pop_head
 
     mov [ecx + 4], dword 0      ; node sebelumnya di buat menunjuk NULL
-    mov eax, 91                 ; dealokasi
-    mov ecx, 8
-    int 0x80
+    call dealloc
     jmp .call_newline_after_pop
 
 .pop_head:
-    mov eax, 91                 ; dealokasi
     mov ebx, [head]
-    mov ecx, 8
-    int 0x80
+    call dealloc
     mov dword [head], 0
 
 .call_newline_after_pop:
