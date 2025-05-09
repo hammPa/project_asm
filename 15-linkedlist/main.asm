@@ -103,7 +103,34 @@ _start:
 
 
 .pop:
+    mov ebx, [head]
+
+.find_last:
+    cmp [ebx + 4], dword 0      ; while current->next == NULL, exit 
+    je .exit_pop
+
+    mov ecx, ebx                ; node sekarang pindahkan ke ebx
+    mov ebx, [ebx + 4]          ; baru lanjut node selanjutnya
+    jmp .find_last
+
 .exit_pop:
+    cmp ebx, [head]
+    je .pop_head
+
+    mov [ecx + 4], dword 0      ; node sebelumnya di buat menunjuk NULL
+    mov eax, 91                 ; dealokasi
+    mov ecx, 8
+    int 0x80
+    jmp .call_newline_after_pop
+
+.pop_head:
+    mov eax, 91                 ; dealokasi
+    mov ebx, [head]
+    mov ecx, 8
+    int 0x80
+    mov dword [head], 0
+
+.call_newline_after_pop:
     mov ecx, newline
     call print
     jmp .main_loop
@@ -149,7 +176,17 @@ alloc:
     ret
 
 
+; yang akan di dealokasi di ebx
+dealloc:
+    push eax
+    push ebx
+    mov eax, 91
+    mov ecx, 8
+    int 0x80
 
+    pop ebx
+    pop eax
+    ret
 
 
 show:
