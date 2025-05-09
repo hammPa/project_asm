@@ -2,6 +2,11 @@ section .data
     addr db "Alamat: ", 0
     val db ",  Nilainya: ", 0
 
+section .bss
+    address1 resd 1
+    address2 resd 1
+    address3 resd 1
+
 section .text
     global _start
     extern print
@@ -10,6 +15,11 @@ section .text
     extern scan
 
 _start:
+    ;|============================================================================================
+    ;|                                                                                           |
+    ;|                                     ALOKASI MEMORI                                        |
+    ;|                                                                                           |
+    ;|============================================================================================
     mov eax, 192         ; syscall number 192 - mmap2 (pemetaan memori/file)
     xor ebx, ebx         ; ebx = 0, alamat NULL -> biarkan kernel memilih alamat
     mov ecx, 4           ; ecx = 4, ukuran memori yang akan dialokasikan (4 byte)
@@ -21,6 +31,7 @@ _start:
 
     ; hasil alokasi terletak di eax
     mov [eax], dword 1234
+    mov [address1], eax
 
     push eax
     mov ecx, addr
@@ -51,6 +62,7 @@ _start:
 
     ; hasil alokasi terletak di eax
     mov [eax], dword 9876
+    mov [address2], eax
 
     push eax
     mov ecx, addr
@@ -84,6 +96,7 @@ _start:
 
     ; hasil alokasi terletak di eax
     mov [eax], dword 4532
+    mov [address3], eax
 
     push eax
     mov ecx, addr
@@ -101,6 +114,45 @@ _start:
     call newline
 
 
+
+
+
+
+
+
+    ;|============================================================================================
+    ;|                                                                                           |
+    ;|                                     DEALOKASI MEMORI                                      |
+    ;|                                                                                           |
+    ;|============================================================================================
+
+
+    mov eax, 91
+    mov ebx, [address1]
+    mov ecx, 4
+    int 0x80
+
+
+
+
+    mov eax, 91
+    mov ebx, [address2]
+    mov ecx, 4
+    int 0x80
+
+
+
+    mov eax, 91
+    mov ebx, [address3]
+    mov ecx, 4
+    int 0x80
+
+
+
+    ;  TES SALAH SATU MEMORI APA SUDAH DI DEALOKASI, KALAU SEGMENTATION FAULT BERARTI BISA
+    mov eax, [address1]
+    mov eax, [eax]
+    call print_int
 
 
     mov eax, 1
