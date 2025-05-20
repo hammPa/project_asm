@@ -10,60 +10,15 @@ section .data
 
 section .bss
     buffer_itoa resb 11
-    angka1 resd 1
 
 section .text
-    global _start
-
-_start:
-    mov ecx, msg
-    call print_str
-
-    push 100
-    call print_int
-    add esp, 4              ; pop manual untuk menghapus push
-    call newline
-
-
-
-    mov ecx, msg
-    call print_str
-    call newline
-
-
-
-    push 4
-    call alloc
-    add esp, 4
-
-    mov [angka1], eax
-    mov [angka1], dword 7432
-    mov eax, [angka1]
-    
-    push eax
-    call print_int
-    add esp, 4
-    call newline
-
-
-    push angka1
-    push 4
-
-    call dealloc            ; nilai dealloc belum diset 0
-    add esp, 8
-
-mov eax, [angka1]
-    
-    push eax
-    call print_int
-    add esp, 4
-    call newline
-
-
-.exit_start:
-    mov eax, 1
-    xor ebx, ebx
-    int 0x80
+    global newline
+    global strlen
+    global print_str
+    global itoa
+    global print_int
+    global alloc
+    global dealloc
 
 
 
@@ -164,6 +119,117 @@ print_int:
 
 
 
+
+
+
+; ======================================== SCAN_STR ========================================
+scan_str:
+    push ebp
+    mov ebp, esp
+    push esi
+
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [ebp + 12]                             ; variabel
+    mov edx, [ebp + 8]                              ; len
+    int 0x80
+
+    ; cek apakah ukuran 0, karna ukuran akan disimpan di eax
+    test eax, eax
+    jle .exit_scan_str
+
+    mov esi, ecx
+    add esi, eax
+    dec esi                                         ; akhir buffer, cari \n, ubah jadi \0
+
+    cmp byte [esi], 0xA
+    jne .exit_scan_str
+    mov byte [esi], 0
+
+.exit_scan_str:
+    pop esi
+    mov esp, ebp
+    pop ebp
+    ret
+
+
+
+; ======================================== STOI ========================================
+stoi:
+    push ebp
+    mov ebp, esp
+    push esi
+
+    xor edx, edx
+    xor ecx, ecx
+    mov esi, [ebp + 8]
+    
+.loop_stoi:
+    mov al, [esi + ecx]
+    cmp al, 0
+    je .exit_stoi
+
+    sub al, '0'
+    imul edx, edx, 10
+    add edx, eax                                 ; edx = edx * 10 + al
+    
+    inc ecx
+    jmp .loop_stoi
+
+.exit_stoi:
+    mov eax, edx
+    pop esi
+    mov esp, ebp
+    pop ebp
+    ret
+
+
+
+
+; ======================================== SCAN_INT ========================================
+scan_int:
+    push ebp
+    mov ebp, esp
+
+    ; input string
+    push buffer_itoa
+    push 11
+    call scan_str
+    add esp, 8                                      ; untuk menghapus 2 args
+
+    ; stack :
+    ; new new ebp
+    ; return scan str
+    ; push len (disini 11)
+    ; push buffer itoa (untuk buffer str)
+    ; new ebp
+    ; return scan int
+    ; addr angka
+
+
+
+    ; stoi
+    ; ubah ke angka, hasil di eax
+    ; karna hasil buffer_itoa di ecx, langsung push saja
+    push ecx
+    call stoi
+    add esp, 4                                      ; menghapus 1 args, hasil di eax
+    
+
+    ; stack :
+    ; new new ebp
+    ; return scan stoi
+    ; push buffer itoa (untuk buffer str)
+    ; new ebp
+    ; return scan int
+    ; addr angka
+
+
+    mov [ebp + 8], eax                             ; pindahkan nilai di eax ke alamat variabel int
+
+    mov esp, ebp
+    pop ebp
+    ret
 
 
 
