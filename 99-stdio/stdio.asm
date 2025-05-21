@@ -282,6 +282,33 @@ scan_int:
 
 
 
+; ======================================== STRCPY ========================================
+strcpy:
+    push ebp
+    mov ebp, esp
+    push esi
+    push edi
+
+    mov esi, [ebp + 12]                 ; arg 1 : destination
+    mov edi, [ebp + 8]                  ; source
+
+.loop_cpy:
+    mov al, [edi]                       ; ambil perhuruf
+    cmp al, 0
+    je .exit_cpy
+
+    mov [esi], al
+
+    inc esi
+    inc edi
+    jmp .loop_cpy
+
+.exit_cpy:
+    pop edi
+    pop esi
+    mov esp, ebp
+    pop ebp
+    ret
 
 
 
@@ -321,3 +348,7 @@ dealloc:
     mov esp, ebp
     pop ebp
     ret
+
+
+
+
