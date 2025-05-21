@@ -54,6 +54,52 @@ strlen:
 
 
 
+
+
+; ======================================== STRCMP ========================================
+strcmp:
+    push ebp
+    mov ebp, esp
+    push esi
+    push edi
+
+    mov esi, [ebp + 12]                     ; arg 1
+    mov edi, [ebp + 8]                      ; arg 2
+    xor eax, eax
+
+.compare:
+    mov al, [esi]
+    mov bl, [edi]
+    cmp al, bl
+    jne .not_equal                                  ; tidak sama
+
+    test al, al                                     ; apakah sudah  \0
+    jz .equal                                      ; sama
+
+    inc esi
+    inc edi
+    jmp .compare
+
+.not_equal:
+    movzx eax, al
+    movzx ebx, bl
+    sub eax, ebx                                    ; s1[i] - s2[i]
+    jmp .exit_cmp
+
+.equal:
+    xor eax, eax
+
+.exit_cmp:
+    pop edi
+    pop esi
+    mov esp, ebp
+    pop ebp
+    ret
+
+
+
+
+
 ; ======================================== PRINT STR ========================================
 print_str:
     push ecx
@@ -230,6 +276,13 @@ scan_int:
     mov esp, ebp
     pop ebp
     ret
+
+
+
+
+
+
+
 
 
 
